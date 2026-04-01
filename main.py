@@ -177,6 +177,71 @@ CATALOG = {
 #  БАЗА ДАНИХ
 # ══════════════════════════════════════════
 
+PHOTO_MAP = {
+    "Optimum Nutrition 100% Whey Gold Standard": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02861/v/69.jpg",
+    "Kevin Levrone Gold Whey": "https://levrosupplements.com/134-large_default/gold-whey-2-kg.jpg",
+    "Kevin Levrone Gold ISO": "https://levrosupplements.com/132-large_default/gold-iso-2-kg.jpg",
+    "MST Best Whey Protein": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02861/v/69.jpg",
+    "Dymatize ISO100": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/dyz/dyz35820/v/40.jpg",
+    "BSN Syntha-6": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/bsn/bsn00720/v/37.jpg",
+    "Rule 1 Whey Blend": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/rul/rul00493/v/40.jpg",
+    "Scitec 100% Whey": "https://scitecnutrition.com/images/product_images/5146_8253f79d8cbe.webp",
+    "Kevin Levrone Anabolic Mass": "https://levrosupplements.com/403-large_default/anabolic-mass-7-kg.jpg",
+    "Kevin Levrone Gold Lean Mass": "https://levrosupplements.com/403-large_default/anabolic-mass-7-kg.jpg",
+    "Optimum Nutrition Serious Mass": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02300/v/37.jpg",
+    "Mutant Mass": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02300/v/37.jpg",
+    "BSN True Mass": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/bsn/bsn00655/v/42.jpg",
+    "Kevin Levrone Gold Creatine": "https://levrosupplements.com/113-large_default/gold-creatine-300-g.jpg",
+    "Kevin Levrone Anabolic Creatine": "https://levrosupplements.com/113-large_default/gold-creatine-300-g.jpg",
+    "Optimum Nutrition Creatine Powder": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02385/v/53.jpg",
+    "Kevin Levrone Anabolic Crea10": "https://levrosupplements.com/113-large_default/gold-creatine-300-g.jpg",
+    "MyProtein Creatine Monohydrate": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02385/v/53.jpg",
+    "Scitec Creatine Monohydrate": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02385/v/53.jpg",
+    "Optimum Nutrition BCAA 1000": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02036/v/48.jpg",
+    "Optimum Nutrition Amino Energy": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02525/v/58.jpg",
+    "Kevin Levrone BCAA Defender": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/sci/sci00027/v/5.jpg",
+    "XTEND BCAA": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/sci/sci00027/v/5.jpg",
+    "MST BCAA Powder": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/sci/sci00027/v/5.jpg",
+    "C4 Original (Cellucor)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/cll/cll12637/v/34.jpg",
+    "Optimum Nutrition Pre-Workout": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02525/v/58.jpg",
+    "Kevin Levrone Gold Pre Workout": "https://levrosupplements.com/113-large_default/gold-creatine-300-g.jpg",
+    "MST Pump Killer": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/cll/cll12637/v/34.jpg",
+    "BSN NO-Xplode": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/bsn/bsn00152/v/39.jpg",
+    "L-Carnitine (BioTech)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/nrx/nrx00773/v/67.jpg",
+    "Kevin Levrone Fat Burner": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/nrx/nrx00773/v/67.jpg",
+    "Animal Cuts": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/unn/unn03293/v/40.jpg",
+    "Nutrex Lipo-6": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/nrx/nrx00773/v/67.jpg",
+    "MST Fat Burner": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/nrx/nrx00773/v/67.jpg",
+    "Optimum Nutrition Opti-Men": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn05223/v/56.jpg",
+    "Optimum Nutrition Opti-Women": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02450/v/41.jpg",
+    "Animal Pak": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/unn/unn03012/v/1.jpg",
+    "NOW Foods Multivitamin": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now03881/v/72.jpg",
+    "MST Multivitamin": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now03881/v/72.jpg",
+    "Omega-3 (NOW Foods)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now01652/v/68.jpg",
+    "Optimum Nutrition Fish Oil": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02984/v/13.jpg",
+    "MST Omega 3-6-9": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now01652/v/68.jpg",
+    "BioTech Fish Oil": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now01652/v/68.jpg",
+    "Optimum Nutrition Glutamine": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02281/v/78.jpg",
+    "MST Glutamine": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02281/v/78.jpg",
+    "Kevin Levrone Glutamine": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02281/v/78.jpg",
+    "Animal Test": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/unn/unn03032/v/83.jpg",
+    "MST Test Booster": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/unn/unn03032/v/83.jpg",
+    "Kevin Levrone Testosterone Booster": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/unn/unn03032/v/83.jpg",
+    "Quest Bar": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/qst/qst01225/v/12.jpg",
+    "Optimum Nutrition Protein Bar": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/qst/qst01225/v/12.jpg",
+    "BSN Protein Crisp": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/bsn/bsn90692/v/56.jpg",
+    "BioTech Protein Bar": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/qst/qst01225/v/12.jpg",
+    "Collagen (NOW Foods)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now03008/v/49.jpg",
+    "ZMA (Optimum Nutrition)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02482/v/79.jpg",
+    "Ашваганда (KSM-66)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/now/now04633/v/8.jpg",
+    "Ізотонік (Isotonic Drink Powder)": "https://cloudinary.images-iherb.com/image/upload/f_auto,q_auto:eco/images/opn/opn02525/v/58.jpg",
+}
+
+async def apply_photos_to_db(db):
+    for name, url in PHOTO_MAP.items():
+        await db.execute("UPDATE products SET photo_url=? WHERE name=?", (url, name))
+    await db.commit()
+
 async def sync_catalog_to_db():
     catalog = await asyncio.get_event_loop().run_in_executor(None, load_catalog_from_sheets)
     if not catalog:
@@ -191,10 +256,11 @@ async def sync_catalog_to_db():
             (cat_id,) = await cur2.fetchone()
             for name, weight, price in items:
                 await db.execute(
-                    "INSERT INTO products (category_id, name, weight, price) VALUES (?,?,?,?)",
-                    (cat_id, name, weight, price),
+                    "INSERT INTO products (category_id, name, weight, price, photo_url) VALUES (?,?,?,?,?)",
+                    (cat_id, name, weight, price, PHOTO_MAP.get(name)),
                 )
         await db.commit()
+        await apply_photos_to_db(db)
     logging.info("Catalog synced from Excel successfully")
 
 async def init_db():
@@ -209,7 +275,8 @@ async def init_db():
             category_id INTEGER NOT NULL,
             name        TEXT NOT NULL,
             weight      TEXT,
-            price       REAL NOT NULL
+            price       REAL NOT NULL,
+            photo_url   TEXT
         );
         CREATE TABLE IF NOT EXISTS cart (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -350,9 +417,16 @@ async def cmd_reload(msg: Message):
 async def show_catalog(msg: Message):
     await msg.answer("📂 <b>Оберіть категорію:</b>", reply_markup=await categories_kb())
 
+async def safe_edit_or_resend(cb: CallbackQuery, text: str, reply_markup):
+    if cb.message.photo:
+        await cb.message.delete()
+        await bot.send_message(cb.message.chat.id, text, reply_markup=reply_markup)
+    else:
+        await cb.message.edit_text(text, reply_markup=reply_markup)
+
 @dp.callback_query(F.data == "catalog")
 async def cb_catalog(cb: CallbackQuery):
-    await cb.message.edit_text("📂 <b>Оберіть категорію:</b>", reply_markup=await categories_kb())
+    await safe_edit_or_resend(cb, "📂 <b>Оберіть категорію:</b>", await categories_kb())
     await cb.answer()
 
 @dp.callback_query(F.data.startswith("cat:"))
@@ -362,10 +436,7 @@ async def cb_category(cb: CallbackQuery):
         cur = await db.execute("SELECT name FROM categories WHERE id=?", (cid,))
         row = await cur.fetchone()
     name = row[0] if row else "Категорія"
-    await cb.message.edit_text(
-        f"{name}\n\nОберіть товар:",
-        reply_markup=await products_kb(cid),
-    )
+    await safe_edit_or_resend(cb, f"{name}\n\nОберіть товар:", await products_kb(cid))
     await cb.answer()
 
 @dp.callback_query(F.data.startswith("prod:"))
@@ -373,19 +444,32 @@ async def cb_product(cb: CallbackQuery):
     pid = int(cb.data.split(":")[1])
     async with aiosqlite.connect(DB_PATH) as db:
         cur = await db.execute(
-            "SELECT name, weight, price, category_id FROM products WHERE id=?", (pid,)
+            "SELECT name, weight, price, category_id, photo_url FROM products WHERE id=?", (pid,)
         )
         row = await cur.fetchone()
     if not row:
         return await cb.answer("Товар не знайдено")
-    name, weight, price, cat_id = row
+    name, weight, price, cat_id, photo_url = row
     text = (
         f"📦 <b>{name}</b>\n"
         f"⚖️ Об'єм/вага: {weight}\n"
         f"💰 Ціна: <b>{price:.0f} грн</b>\n\n"
         f"💳 Оплата при отриманні"
     )
-    await cb.message.edit_text(text, reply_markup=await product_detail_kb(pid, cat_id))
+    kb = await product_detail_kb(pid, cat_id)
+    if photo_url:
+        try:
+            await cb.message.delete()
+            await bot.send_photo(
+                chat_id=cb.message.chat.id,
+                photo=photo_url,
+                caption=text,
+                reply_markup=kb
+            )
+        except Exception:
+            await cb.message.edit_text(text, reply_markup=kb)
+    else:
+        await cb.message.edit_text(text, reply_markup=kb)
     await cb.answer()
 
 # ══════════════════════════════════════════
