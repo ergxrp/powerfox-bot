@@ -474,9 +474,9 @@ def quiz_exp_kb(goal: str, gender: str) -> InlineKeyboardMarkup:
 
 def quiz_budget_kb(goal: str, gender: str, exp: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💰 До 600 грн",       callback_data=f"qb:{goal}:{gender}:{exp}:lo")],
-        [InlineKeyboardButton(text="💳 600 – 1500 грн",   callback_data=f"qb:{goal}:{gender}:{exp}:mid")],
-        [InlineKeyboardButton(text="💎 Понад 1500 грн",   callback_data=f"qb:{goal}:{gender}:{exp}:hi")],
+        [InlineKeyboardButton(text="💰 До 1000 грн",      callback_data=f"qb:{goal}:{gender}:{exp}:lo")],
+        [InlineKeyboardButton(text="💳 1000 – 2000 грн",  callback_data=f"qb:{goal}:{gender}:{exp}:mid")],
+        [InlineKeyboardButton(text="💎 2000+ грн",         callback_data=f"qb:{goal}:{gender}:{exp}:hi")],
     ])
 
 async def categories_kb() -> InlineKeyboardMarkup:
@@ -911,9 +911,9 @@ EXP_LABELS = {
     "advanced": "🔴 Просунутий",
 }
 BUDGET_LABELS = {
-    "lo":  "💰 До 600 грн",
-    "mid": "💳 600–1500 грн",
-    "hi":  "💎 Понад 1500 грн",
+    "lo":  "💰 До 1000 грн",
+    "mid": "💳 1000–2000 грн",
+    "hi":  "💎 2000+ грн",
 }
 
 @dp.message(F.text == "🎯 Підібрати товар під мене")
