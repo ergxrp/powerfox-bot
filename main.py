@@ -587,18 +587,16 @@ async def cmd_reload(msg: Message):
 async def cmd_clients(msg: Message):
     if msg.from_user.id != ADMIN_ID:
         return
-    await msg.answer("⏳ Завантажую базу клієнтів...")
     ids = await get_all_client_ids()
     if not ids:
         return await msg.answer(
-            "❌ Клієнтів не знайдено або Google Sheets не налаштовано.\n\n"
-            "Перевірте змінну <code>GOOGLE_CREDS_JSON</code> у Railway."
+            "👥 <b>База клієнтів порожня</b>\n\n"
+            "Клієнти з'являться тут після того, як підтвердите перше замовлення."
         )
     await msg.answer(
         f"👥 <b>База клієнтів</b>\n\n"
         f"Унікальних клієнтів: <b>{len(ids)}</b>\n\n"
-        f"Для розсилки: <code>/broadcast Ваш текст</code>\n"
-        f"Таблиця: spreadsheets.google.com (лист «Клієнти»)"
+        f"Для розсилки: <code>/broadcast Ваш текст</code>"
     )
 
 @dp.message(Command("broadcast"))
@@ -612,12 +610,10 @@ async def cmd_broadcast(msg: Message):
             "<code>/broadcast Ваш текст повідомлення</code>\n\n"
             "Підтримується HTML: &lt;b&gt;жирний&lt;/b&gt;, &lt;i&gt;курсив&lt;/i&gt;"
         )
-    await msg.answer("⏳ Отримую список клієнтів...")
     ids = await get_all_client_ids()
     if not ids:
         return await msg.answer(
-            "❌ Клієнтів не знайдено або Google Sheets не налаштовано.\n\n"
-            "Перевірте змінну <code>GOOGLE_CREDS_JSON</code> у Railway."
+            "👥 База клієнтів порожня. Поки нікому не надіслати."
         )
     status_msg = await msg.answer(f"📤 Розсилаю {len(ids)} клієнтам...")
     sent, failed = 0, 0
