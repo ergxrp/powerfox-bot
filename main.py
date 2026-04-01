@@ -974,13 +974,22 @@ async def cb_quiz_budget(cb: CallbackQuery):
 
     product_names = QUIZ_RECOMMENDATIONS.get((goal, gender, exp, budget), [])
 
+    price_limit = {"lo": 1000, "mid": 2000}.get(budget)
+
     async with aiosqlite.connect(DB_PATH) as db:
         found = []
         for pname in product_names:
-            cur = await db.execute(
-                "SELECT id, name, weight, price FROM products WHERE name LIKE ? LIMIT 1",
-                (f"%{pname[:20]}%",),
-            )
+            if price_limit:
+                cur = await db.execute(
+                    "SELECT id, name, weight, price FROM products "
+                    "WHERE name LIKE ? AND price <= ? LIMIT 1",
+                    (f"%{pname[:20]}%", price_limit),
+                )
+            else:
+                cur = await db.execute(
+                    "SELECT id, name, weight, price FROM products WHERE name LIKE ? LIMIT 1",
+                    (f"%{pname[:20]}%",),
+                )
             row = await cur.fetchone()
             if row:
                 found.append(row)
