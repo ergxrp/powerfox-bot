@@ -325,7 +325,7 @@ def main_menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="🛍 Каталог"),       KeyboardButton(text="🛒 Кошик")],
-            [KeyboardButton(text="📋 Мої замовлення"), KeyboardButton(text="💬 Менеджер")],
+            [KeyboardButton(text="📋 Мої замовлення"), KeyboardButton(text="💬 Менеджер для консультацій")],
         ],
         resize_keyboard=True,
     )
@@ -746,7 +746,7 @@ async def my_orders(msg: Message):
 #  ПІДТРИМКА
 # ══════════════════════════════════════════
 
-@dp.message(F.text == "💬 Менеджер")
+@dp.message(F.text == "💬 Менеджер для консультацій")
 async def support(msg: Message):
     await msg.answer(
         "💬 <b>Менеджер для консультацій</b>\n\n"
