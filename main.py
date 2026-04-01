@@ -332,6 +332,39 @@ QUIZ_RECOMMENDATIONS = {
     ("health", "advanced"):  ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "Ашваганда (KSM-66)"],
 }
 
+PRODUCT_DESC = {
+    "Optimum Nutrition 100% Whey Gold Standard": "🥛 Якісний протеїн для відновлення та росту м'язів після тренування",
+    "Optimum Nutrition Creatine Powder":         "⚡ Збільшує силу та м'язову масу, покращує вибухову потужність",
+    "Optimum Nutrition Opti-Men":                "💊 Комплекс вітамінів та мінералів для активних чоловіків",
+    "Optimum Nutrition Opti-Women":              "💊 Комплекс вітамінів та мінералів спеціально для жінок",
+    "Kevin Levrone Anabolic Mass":               "💪 Гейнер для набору маси — протеїн + вуглеводи в одному",
+    "BSN Syntha-6":                              "🥛 Повільний протеїн для тривалого живлення м'язів",
+    "XTEND BCAA":                                "🔄 BCAA для відновлення та захисту м'язів під час тренування",
+    "Mutant Mass":                               "💪 Важкий гейнер для максимального набору ваги і маси",
+    "Dymatize ISO100":                           "🥛 Ізолят протеїну — чистий білок без жирів і вуглеводів",
+    "C4 Original (Cellucor)":                    "🔥 Передтренувальний комплекс для енергії та концентрації",
+    "Animal Test":                               "🦁 Тестобустер для підвищення рівня тестостерону і сили",
+    "L-Carnitine (BioTech)":                     "🔥 Спалює жир, перетворюючи його на енергію під час кардіо",
+    "Scitec 100% Whey":                          "🥛 Протеїн для збереження м'язів при схудненні",
+    "Nutrex Lipo-6":                             "🔥 Потужний жироспалювач для прискорення метаболізму",
+    "Optimum Nutrition Amino Energy":            "⚡ Амінокислоти + кофеїн для енергії та відновлення",
+    "MST BCAA Powder":                           "🔄 BCAA для захисту м'язів та прискорення відновлення",
+    "Animal Cuts":                               "✂️ Потужний жироспалюючий комплекс для рельєфу",
+    "MST Pump Killer":                           "💥 Передтренувальний без кофеїну для пампу та витривалості",
+    "Rule 1 Whey Blend":                         "🥛 Протеїн для відновлення та зростання сили після тренувань",
+    "BSN NO-Xplode":                             "🔥 Передтренувальний для вибухової сили та витривалості",
+    "Kevin Levrone Gold Creatine":               "⚡ Чистий креатин моногідрат для максимального приросту сили",
+    "Optimum Nutrition BCAA 1000":               "🔄 BCAA у капсулах для відновлення та антикатаболічного ефекту",
+    "Kevin Levrone Anabolic Crea10":             "⚡ Крeatин з транспортною системою для кращого засвоєння",
+    "Kevin Levrone Gold Whey":                   "🥛 Преміальний протеїн для набору сили та відновлення",
+    "Omega-3 (NOW Foods)":                       "🐟 Омега-3 для здоров'я серця, суглобів та імунітету",
+    "Collagen (NOW Foods)":                      "💧 Колаген для суглобів, шкіри та сполучних тканин",
+    "Animal Pak":                                "💊 Легендарний вітамінний пак для атлетів — все в одному",
+    "Optimum Nutrition Glutamine":               "🔄 Глютамін для відновлення, імунітету та здоров'я кишківника",
+    "ZMA (Optimum Nutrition)":                   "😴 Цинк + магній + B6 для кращого сну та відновлення",
+    "Ашваганда (KSM-66)":                        "🌿 Адаптоген для зниження стресу, сили та гормонального балансу",
+}
+
 # ══════════════════════════════════════════
 #  КЛАВІАТУРИ
 # ══════════════════════════════════════════
@@ -840,7 +873,9 @@ async def cb_quiz_exp(cb: CallbackQuery):
     lines = []
     for pid, pname, weight, price in found:
         w = f" ({weight})" if weight else ""
-        lines.append(f"• <b>{pname}</b>{w} — <b>{price:.0f} грн</b>")
+        desc = PRODUCT_DESC.get(pname, "")
+        desc_line = f"\n   <i>{desc}</i>" if desc else ""
+        lines.append(f"• <b>{pname}</b>{w} — <b>{price:.0f} грн</b>{desc_line}")
 
     buttons = []
     for pid, pname, weight, price in found:
@@ -853,7 +888,7 @@ async def cb_quiz_exp(cb: CallbackQuery):
         f"✅ <b>Результати підбору:</b>\n"
         f"Ціль: <b>{goal_label}</b> | Рівень: <b>{exp_label}</b>\n\n"
         f"Ось що ми рекомендуємо:\n\n"
-        + "\n".join(lines) +
+        + "\n\n".join(lines) +
         "\n\n👇 Натисніть на товар щоб одразу додати до кошика:"
     )
     await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
