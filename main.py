@@ -30,7 +30,7 @@ import aiosqlite
 # ─────────────────────────────────────────
 BOT_TOKEN  = "8620629928:AAHQ-1xoohNkFESNApf9Z2KaG4Rb4CFPIMw"
 ADMIN_ID   = 872996070
-DB_PATH    = "/app/shop.db"
+DB_PATH    = "/data/shop.db"
 SHEET_ID   = "1l4ONQZmxujosdjZpDV51HG7ZSHIw_Vra-lkG_7R_6ck"
 SYNC_EVERY = 600  # секунд (10 хвилин)
 # ─────────────────────────────────────────
@@ -1319,6 +1319,7 @@ async def health_check_server():
     logging.info(f"Health check server started on port {port}")
 
 async def main():
+    os.makedirs("/data", exist_ok=True)
     await init_db()
     asyncio.create_task(auto_sync_loop())
     asyncio.create_task(health_check_server())
