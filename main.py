@@ -317,6 +317,21 @@ class OrderFSM(StatesGroup):
     address   = State()
     comment   = State()
 
+QUIZ_RECOMMENDATIONS = {
+    ("mass", "beginner"):    ["Optimum Nutrition 100% Whey Gold Standard", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Men"],
+    ("mass", "middle"):      ["Kevin Levrone Anabolic Mass", "BSN Syntha-6", "XTEND BCAA", "Optimum Nutrition Creatine Powder"],
+    ("mass", "advanced"):    ["Mutant Mass", "Dymatize ISO100", "C4 Original (Cellucor)", "Animal Test"],
+    ("cut", "beginner"):     ["L-Carnitine (BioTech)", "Optimum Nutrition Opti-Women", "Scitec 100% Whey"],
+    ("cut", "middle"):       ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA", "Optimum Nutrition Amino Energy"],
+    ("cut", "advanced"):     ["Animal Cuts", "MST Pump Killer", "Optimum Nutrition Amino Energy", "MST BCAA Powder"],
+    ("strength", "beginner"):["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Men"],
+    ("strength", "middle"):  ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend", "Optimum Nutrition BCAA 1000"],
+    ("strength", "advanced"):["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "Animal Test", "Kevin Levrone Gold Whey"],
+    ("health", "beginner"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Men", "Collagen (NOW Foods)"],
+    ("health", "middle"):    ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "ZMA (Optimum Nutrition)"],
+    ("health", "advanced"):  ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "Ашваганда (KSM-66)"],
+}
+
 # ══════════════════════════════════════════
 #  КЛАВІАТУРИ
 # ══════════════════════════════════════════
@@ -324,11 +339,27 @@ class OrderFSM(StatesGroup):
 def main_menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
+            [KeyboardButton(text="🎯 Підібрати товар під мене")],
             [KeyboardButton(text="🛍 Каталог"),       KeyboardButton(text="🛒 Кошик")],
             [KeyboardButton(text="📋 Мої замовлення"), KeyboardButton(text="💬 Менеджер для консультацій")],
         ],
         resize_keyboard=True,
     )
+
+def quiz_goals_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💪 Набір маси",          callback_data="quiz_goal:mass")],
+        [InlineKeyboardButton(text="🔥 Схуднення",           callback_data="quiz_goal:cut")],
+        [InlineKeyboardButton(text="⚡ Сила та витривалість", callback_data="quiz_goal:strength")],
+        [InlineKeyboardButton(text="🌿 Загальне здоров'я",   callback_data="quiz_goal:health")],
+    ])
+
+def quiz_exp_kb(goal: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🟢 Початківець",    callback_data=f"quiz_exp:{goal}:beginner")],
+        [InlineKeyboardButton(text="🟡 Середній рівень", callback_data=f"quiz_exp:{goal}:middle")],
+        [InlineKeyboardButton(text="🔴 Просунутий",     callback_data=f"quiz_exp:{goal}:advanced")],
+    ])
 
 async def categories_kb() -> InlineKeyboardMarkup:
     async with aiosqlite.connect(DB_PATH) as db:
@@ -741,6 +772,101 @@ async def my_orders(msg: Message):
         for oid, total, status, created in rows
     )
     await msg.answer(f"📋 <b>Ваші замовлення:</b>\n\n<code>{lines}</code>")
+
+# ══════════════════════════════════════════
+#  КВІЗ — ПІДБІР ТОВАРУ
+# ══════════════════════════════════════════
+
+GOAL_LABELS = {
+    "mass":     "💪 Набір маси",
+    "cut":      "🔥 Схуднення",
+    "strength": "⚡ Сила та витривалість",
+    "health":   "🌿 Загальне здоров'я",
+}
+EXP_LABELS = {
+    "beginner": "🟢 Початківець",
+    "middle":   "🟡 Середній рівень",
+    "advanced": "🔴 Просунутий",
+}
+
+@dp.message(F.text == "🎯 Підібрати товар під мене")
+async def quiz_start(msg: Message):
+    await msg.answer(
+        "🎯 <b>Підбір товару під ваші цілі</b>\n\n"
+        "Дайте відповідь на 2 короткі питання — і я підберу найкращі товари саме для вас!\n\n"
+        "<b>Питання 1 з 2:</b> Яка ваша головна ціль?",
+        reply_markup=quiz_goals_kb(),
+    )
+
+@dp.callback_query(F.data.startswith("quiz_goal:"))
+async def cb_quiz_goal(cb: CallbackQuery):
+    goal = cb.data.split(":")[1]
+    label = GOAL_LABELS.get(goal, goal)
+    await cb.message.edit_text(
+        f"🎯 Ціль: <b>{label}</b>\n\n"
+        "<b>Питання 2 з 2:</b> Який ваш рівень досвіду у спорті?",
+        reply_markup=quiz_exp_kb(goal),
+    )
+    await cb.answer()
+
+@dp.callback_query(F.data.startswith("quiz_exp:"))
+async def cb_quiz_exp(cb: CallbackQuery):
+    _, goal, exp = cb.data.split(":")
+    goal_label = GOAL_LABELS.get(goal, goal)
+    exp_label  = EXP_LABELS.get(exp, exp)
+
+    product_names = QUIZ_RECOMMENDATIONS.get((goal, exp), [])
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        found = []
+        for pname in product_names:
+            cur = await db.execute(
+                "SELECT id, name, weight, price FROM products WHERE name LIKE ? LIMIT 1",
+                (f"%{pname[:20]}%",),
+            )
+            row = await cur.fetchone()
+            if row:
+                found.append(row)
+
+    if not found:
+        await cb.message.edit_text(
+            f"✅ Ціль: <b>{goal_label}</b> | Рівень: <b>{exp_label}</b>\n\n"
+            "На жаль, рекомендовані товари зараз не знайдені в каталозі. "
+            "Зверніться до нашого менеджера @notsweat02 для персональної консультації!"
+        )
+        await cb.answer()
+        return
+
+    lines = []
+    for pid, pname, weight, price in found:
+        w = f" ({weight})" if weight else ""
+        lines.append(f"• <b>{pname}</b>{w} — <b>{price:.0f} грн</b>")
+
+    buttons = []
+    for pid, pname, weight, price in found:
+        short = pname[:28] + "…" if len(pname) > 28 else pname
+        buttons.append([InlineKeyboardButton(text=f"🛒 {short}", callback_data=f"add:{pid}")])
+    buttons.append([InlineKeyboardButton(text="🔄 Пройти знову", callback_data="quiz_restart")])
+    buttons.append([InlineKeyboardButton(text="🛍 До каталогу", callback_data="catalog")])
+
+    text = (
+        f"✅ <b>Результати підбору:</b>\n"
+        f"Ціль: <b>{goal_label}</b> | Рівень: <b>{exp_label}</b>\n\n"
+        f"Ось що ми рекомендуємо:\n\n"
+        + "\n".join(lines) +
+        "\n\n👇 Натисніть на товар щоб одразу додати до кошика:"
+    )
+    await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+    await cb.answer()
+
+@dp.callback_query(F.data == "quiz_restart")
+async def cb_quiz_restart(cb: CallbackQuery):
+    await cb.message.edit_text(
+        "🎯 <b>Підбір товару під ваші цілі</b>\n\n"
+        "Яка ваша головна ціль?",
+        reply_markup=quiz_goals_kb(),
+    )
+    await cb.answer()
 
 # ══════════════════════════════════════════
 #  ПІДТРИМКА
