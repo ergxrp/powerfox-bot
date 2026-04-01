@@ -56,6 +56,34 @@ async def get_all_client_ids() -> list[int]:
         rows = await cur.fetchall()
     return [r[0] for r in rows]
 
+async def get_all_clients() -> list[dict]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT chat_id, full_name, phone, created_at FROM customers ORDER BY id"
+        )
+        rows = await cur.fetchall()
+    return [dict(r) for r in rows]
+
+async def get_client_orders(chat_id: int) -> list[dict]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT id, total, status, address, created_at FROM orders "
+            "WHERE user_id=? ORDER BY id DESC",
+            (chat_id,),
+        )
+        orders = await cur.fetchall()
+        result = []
+        for o in orders:
+            cur2 = await db.execute(
+                "SELECT name, weight, price, qty FROM order_items WHERE order_id=?",
+                (o["id"],),
+            )
+            items = await cur2.fetchall()
+            result.append({"order": dict(o), "items": [dict(i) for i in items]})
+    return result
+
 # ══════════════════════════════════════════
 #  ЧИТАННЯ КАТАЛОГУ З GOOGLE SHEETS
 # ══════════════════════════════════════════
@@ -587,17 +615,47 @@ async def cmd_reload(msg: Message):
 async def cmd_clients(msg: Message):
     if msg.from_user.id != ADMIN_ID:
         return
-    ids = await get_all_client_ids()
-    if not ids:
+    clients = await get_all_clients()
+    if not clients:
         return await msg.answer(
             "👥 <b>База клієнтів порожня</b>\n\n"
             "Клієнти з'являться тут після того, як підтвердите перше замовлення."
         )
+    buttons = []
+    for c in clients:
+        label = f"👤 {c['full_name']}  |  {c['phone']}  |  {c['created_at']}"
+        buttons.append([InlineKeyboardButton(text=label, callback_data=f"cinfo:{c['chat_id']}")])
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await msg.answer(
-        f"👥 <b>База клієнтів</b>\n\n"
-        f"Унікальних клієнтів: <b>{len(ids)}</b>\n\n"
-        f"Для розсилки: <code>/broadcast Ваш текст</code>"
+        f"👥 <b>База клієнтів</b> — {len(clients)} чол.\n\n"
+        f"Натисніть на клієнта щоб побачити його замовлення 👇",
+        reply_markup=kb,
     )
+
+@dp.callback_query(F.data.startswith("cinfo:"))
+async def cb_client_info(cb: CallbackQuery):
+    if cb.from_user.id != ADMIN_ID:
+        return await cb.answer()
+    chat_id = int(cb.data.split(":")[1])
+    orders = await get_client_orders(chat_id)
+    if not orders:
+        return await cb.answer("Замовлень не знайдено", show_alert=True)
+    lines = []
+    for entry in orders:
+        o = entry["order"]
+        items_text = "\n".join(
+            f"  • {i['name']} {i['weight'] or ''} × {i['qty']} = {i['price']*i['qty']:.0f} грн"
+            for i in entry["items"]
+        )
+        lines.append(
+            f"🧾 <b>Замовлення #{o['id']}</b>  [{o['status']}]\n"
+            f"📅 {o['created_at']}\n"
+            f"📍 {o['address'] or '—'}\n"
+            f"{items_text}\n"
+            f"💰 Сума: <b>{o['total']:.0f} грн</b>"
+        )
+    await cb.message.answer("\n\n".join(lines))
+    await cb.answer()
 
 @dp.message(Command("broadcast"))
 async def cmd_broadcast(msg: Message):
