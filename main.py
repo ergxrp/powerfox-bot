@@ -6,10 +6,14 @@ Telegram Shop Bot — Спортивне харчування
 import asyncio
 import csv
 import io
+import json
 import logging
 import os
 import urllib.request
+from datetime import datetime
 import openpyxl
+import gspread
+from google.oauth2.service_account import Credentials
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -27,11 +31,12 @@ import aiosqlite
 # ─────────────────────────────────────────
 #  НАЛАШТУВАННЯ
 # ─────────────────────────────────────────
-BOT_TOKEN   = "8620629928:AAHQ-1xoohNkFESNApf9Z2KaG4Rb4CFPIMw"
-ADMIN_ID    = 872996070
-DB_PATH     = "shop.db"
-SHEET_ID    = "1l4ONQZmxujosdjZpDV51HG7ZSHIw_Vra-lkG_7R_6ck"
-SYNC_EVERY  = 600  # секунд (10 хвилин)
+BOT_TOKEN        = "8620629928:AAHQ-1xoohNkFESNApf9Z2KaG4Rb4CFPIMw"
+ADMIN_ID         = 872996070
+DB_PATH          = "shop.db"
+SHEET_ID         = "1l4ONQZmxujosdjZpDV51HG7ZSHIw_Vra-lkG_7R_6ck"
+SYNC_EVERY       = 600  # секунд (10 хвилин)
+GOOGLE_CREDS_JSON = os.getenv("GOOGLE_CREDS_JSON", "")  # JSON сервісного акаунту
 # ─────────────────────────────────────────
 
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +44,73 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTM
 dp  = Dispatcher(storage=MemoryStorage())
 
 EXCEL_PATH = "catalog.xlsx"
+
+# ══════════════════════════════════════════
+#  GOOGLE SHEETS — КЛІЄНТИ
+# ══════════════════════════════════════════
+
+def _get_gspread_client():
+    if not GOOGLE_CREDS_JSON:
+        return None
+    try:
+        creds_dict = json.loads(GOOGLE_CREDS_JSON)
+        creds = Credentials.from_service_account_info(
+            creds_dict,
+            scopes=["https://www.googleapis.com/auth/spreadsheets"],
+        )
+        return gspread.authorize(creds)
+    except Exception as e:
+        logging.error(f"Google Sheets auth error: {e}")
+        return None
+
+def _append_customer_sync(order_id: int, uid: int, full_name: str, phone: str, total: float):
+    gc = _get_gspread_client()
+    if not gc:
+        return
+    try:
+        sh = gc.open_by_key(SHEET_ID)
+        try:
+            ws = sh.worksheet("Клієнти")
+        except gspread.WorksheetNotFound:
+            ws = sh.add_worksheet(title="Клієнти", rows=1000, cols=6)
+            ws.append_row(["№ замовлення", "chat_id", "Ім'я", "Телефон", "Дата", "Сума"])
+        ws.append_row([
+            order_id,
+            uid,
+            full_name,
+            phone,
+            datetime.now().strftime("%d.%m.%Y %H:%M"),
+            f"{total:.0f} грн",
+        ])
+    except Exception as e:
+        logging.error(f"Clients sheet write error: {e}")
+
+async def save_customer_to_sheets(order_id: int, uid: int, full_name: str, phone: str, total: float):
+    await asyncio.get_event_loop().run_in_executor(
+        None, _append_customer_sync, order_id, uid, full_name, phone, total
+    )
+
+def _get_clients_sync() -> list[int]:
+    gc = _get_gspread_client()
+    if not gc:
+        return []
+    try:
+        sh = gc.open_by_key(SHEET_ID)
+        ws = sh.worksheet("Клієнти")
+        rows = ws.get_all_records()
+        seen, ids = set(), []
+        for row in rows:
+            cid = row.get("chat_id")
+            if cid and int(cid) not in seen:
+                seen.add(int(cid))
+                ids.append(int(cid))
+        return ids
+    except Exception as e:
+        logging.error(f"Clients sheet read error: {e}")
+        return []
+
+async def get_all_client_ids() -> list[int]:
+    return await asyncio.get_event_loop().run_in_executor(None, _get_clients_sync)
 
 # ══════════════════════════════════════════
 #  ЧИТАННЯ КАТАЛОГУ З GOOGLE SHEETS
@@ -558,6 +630,58 @@ async def cmd_reload(msg: Message):
     await sync_catalog_to_db()
     await msg.answer("✅ Каталог успішно оновлено!")
 
+@dp.message(Command("clients"))
+async def cmd_clients(msg: Message):
+    if msg.from_user.id != ADMIN_ID:
+        return
+    await msg.answer("⏳ Завантажую базу клієнтів...")
+    ids = await get_all_client_ids()
+    if not ids:
+        return await msg.answer(
+            "❌ Клієнтів не знайдено або Google Sheets не налаштовано.\n\n"
+            "Перевірте змінну <code>GOOGLE_CREDS_JSON</code> у Railway."
+        )
+    await msg.answer(
+        f"👥 <b>База клієнтів</b>\n\n"
+        f"Унікальних клієнтів: <b>{len(ids)}</b>\n\n"
+        f"Для розсилки: <code>/broadcast Ваш текст</code>\n"
+        f"Таблиця: spreadsheets.google.com (лист «Клієнти»)"
+    )
+
+@dp.message(Command("broadcast"))
+async def cmd_broadcast(msg: Message):
+    if msg.from_user.id != ADMIN_ID:
+        return
+    text = msg.text.removeprefix("/broadcast").strip()
+    if not text:
+        return await msg.answer(
+            "📢 Використання:\n"
+            "<code>/broadcast Ваш текст повідомлення</code>\n\n"
+            "Підтримується HTML: &lt;b&gt;жирний&lt;/b&gt;, &lt;i&gt;курсив&lt;/i&gt;"
+        )
+    await msg.answer("⏳ Отримую список клієнтів...")
+    ids = await get_all_client_ids()
+    if not ids:
+        return await msg.answer(
+            "❌ Клієнтів не знайдено або Google Sheets не налаштовано.\n\n"
+            "Перевірте змінну <code>GOOGLE_CREDS_JSON</code> у Railway."
+        )
+    status_msg = await msg.answer(f"📤 Розсилаю {len(ids)} клієнтам...")
+    sent, failed = 0, 0
+    for cid in ids:
+        try:
+            await bot.send_message(cid, text)
+            sent += 1
+        except Exception:
+            failed += 1
+        await asyncio.sleep(0.05)  # ~20 повідомлень/сек — без бана Telegram
+    await status_msg.edit_text(
+        f"✅ <b>Розсилка завершена!</b>\n\n"
+        f"📨 Відправлено: <b>{sent}</b>\n"
+        f"❌ Не доставлено: <b>{failed}</b>\n"
+        f"(клієнти, що заблокували бота)"
+    )
+
 # ══════════════════════════════════════════
 #  КАТАЛОГ
 # ══════════════════════════════════════════
@@ -844,8 +968,15 @@ async def adm_confirm(cb: CallbackQuery):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE orders SET status='підтверджено' WHERE id=?", (order_id,))
         await db.commit()
+        cur = await db.execute(
+            "SELECT full_name, phone, total FROM orders WHERE id=?", (order_id,)
+        )
+        row = await cur.fetchone()
     await cb.message.edit_reply_markup()
     await cb.answer("✅ Замовлення підтверджено")
+    if row:
+        full_name, phone, total = row
+        asyncio.create_task(save_customer_to_sheets(int(order_id), int(uid), full_name, phone, total))
     try:
         await bot.send_message(int(uid),
             f"✅ Ваше замовлення <b>#{order_id}</b> підтверджено! "
