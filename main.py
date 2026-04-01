@@ -317,19 +317,91 @@ class OrderFSM(StatesGroup):
     address   = State()
     comment   = State()
 
+# ключ: (goal, gender, exp, budget)  budget: lo=до 600, mid=600-1500, hi=1500+
 QUIZ_RECOMMENDATIONS = {
-    ("mass", "beginner"):    ["Optimum Nutrition 100% Whey Gold Standard", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Men"],
-    ("mass", "middle"):      ["Kevin Levrone Anabolic Mass", "BSN Syntha-6", "XTEND BCAA", "Optimum Nutrition Creatine Powder"],
-    ("mass", "advanced"):    ["Mutant Mass", "Dymatize ISO100", "C4 Original (Cellucor)", "Animal Test"],
-    ("cut", "beginner"):     ["L-Carnitine (BioTech)", "Optimum Nutrition Opti-Women", "Scitec 100% Whey"],
-    ("cut", "middle"):       ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA", "Optimum Nutrition Amino Energy"],
-    ("cut", "advanced"):     ["Animal Cuts", "MST Pump Killer", "Optimum Nutrition Amino Energy", "MST BCAA Powder"],
-    ("strength", "beginner"):["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Men"],
-    ("strength", "middle"):  ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend", "Optimum Nutrition BCAA 1000"],
-    ("strength", "advanced"):["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "Animal Test", "Kevin Levrone Gold Whey"],
-    ("health", "beginner"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Men", "Collagen (NOW Foods)"],
-    ("health", "middle"):    ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "ZMA (Optimum Nutrition)"],
-    ("health", "advanced"):  ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "Ашваганда (KSM-66)"],
+    # ── НАБІР МАСИ ──────────────────────────────────────────────────────
+    ("mass","m","beginner","lo"): ["Optimum Nutrition Creatine Powder", "Optimum Nutrition BCAA 1000"],
+    ("mass","m","beginner","mid"):["Optimum Nutrition 100% Whey Gold Standard", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Men"],
+    ("mass","m","beginner","hi"): ["Kevin Levrone Anabolic Mass", "Optimum Nutrition 100% Whey Gold Standard", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Men"],
+    ("mass","m","middle","lo"):   ["Optimum Nutrition Creatine Powder", "XTEND BCAA"],
+    ("mass","m","middle","mid"):  ["BSN Syntha-6", "Optimum Nutrition Creatine Powder", "XTEND BCAA"],
+    ("mass","m","middle","hi"):   ["Kevin Levrone Anabolic Mass", "BSN Syntha-6", "XTEND BCAA", "Optimum Nutrition Creatine Powder"],
+    ("mass","m","advanced","lo"): ["Optimum Nutrition Creatine Powder", "XTEND BCAA"],
+    ("mass","m","advanced","mid"):["Rule 1 Whey Blend", "Kevin Levrone Gold Creatine", "XTEND BCAA"],
+    ("mass","m","advanced","hi"): ["Mutant Mass", "Dymatize ISO100", "C4 Original (Cellucor)", "Animal Test"],
+
+    ("mass","f","beginner","lo"): ["Optimum Nutrition Opti-Women", "Optimum Nutrition Creatine Powder"],
+    ("mass","f","beginner","mid"):["Scitec 100% Whey", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Women"],
+    ("mass","f","beginner","hi"): ["Kevin Levrone Anabolic Mass", "Scitec 100% Whey", "Optimum Nutrition Opti-Women"],
+    ("mass","f","middle","lo"):   ["Optimum Nutrition Creatine Powder", "XTEND BCAA"],
+    ("mass","f","middle","mid"):  ["BSN Syntha-6", "Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Women"],
+    ("mass","f","middle","hi"):   ["Kevin Levrone Anabolic Mass", "BSN Syntha-6", "XTEND BCAA", "Optimum Nutrition Opti-Women"],
+    ("mass","f","advanced","lo"): ["Optimum Nutrition Creatine Powder", "MST BCAA Powder"],
+    ("mass","f","advanced","mid"):["Rule 1 Whey Blend", "Kevin Levrone Gold Creatine", "XTEND BCAA"],
+    ("mass","f","advanced","hi"): ["Mutant Mass", "Dymatize ISO100", "C4 Original (Cellucor)", "Optimum Nutrition Opti-Women"],
+
+    # ── СХУДНЕННЯ ───────────────────────────────────────────────────────
+    ("cut","m","beginner","lo"):  ["L-Carnitine (BioTech)"],
+    ("cut","m","beginner","mid"): ["L-Carnitine (BioTech)", "Scitec 100% Whey", "Optimum Nutrition Opti-Men"],
+    ("cut","m","beginner","hi"):  ["L-Carnitine (BioTech)", "Scitec 100% Whey", "Optimum Nutrition Opti-Men", "Optimum Nutrition Amino Energy"],
+    ("cut","m","middle","lo"):    ["L-Carnitine (BioTech)", "XTEND BCAA"],
+    ("cut","m","middle","mid"):   ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA"],
+    ("cut","m","middle","hi"):    ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA", "Optimum Nutrition Amino Energy"],
+    ("cut","m","advanced","lo"):  ["L-Carnitine (BioTech)", "MST BCAA Powder"],
+    ("cut","m","advanced","mid"): ["Animal Cuts", "L-Carnitine (BioTech)", "MST BCAA Powder"],
+    ("cut","m","advanced","hi"):  ["Animal Cuts", "MST Pump Killer", "Optimum Nutrition Amino Energy", "MST BCAA Powder"],
+
+    ("cut","f","beginner","lo"):  ["L-Carnitine (BioTech)", "Optimum Nutrition Opti-Women"],
+    ("cut","f","beginner","mid"): ["L-Carnitine (BioTech)", "Optimum Nutrition Opti-Women", "Scitec 100% Whey"],
+    ("cut","f","beginner","hi"):  ["L-Carnitine (BioTech)", "Optimum Nutrition Opti-Women", "Scitec 100% Whey", "Optimum Nutrition Amino Energy"],
+    ("cut","f","middle","lo"):    ["L-Carnitine (BioTech)", "MST BCAA Powder"],
+    ("cut","f","middle","mid"):   ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA"],
+    ("cut","f","middle","hi"):    ["Nutrex Lipo-6", "L-Carnitine (BioTech)", "XTEND BCAA", "Optimum Nutrition Amino Energy"],
+    ("cut","f","advanced","lo"):  ["L-Carnitine (BioTech)", "MST BCAA Powder"],
+    ("cut","f","advanced","mid"): ["Animal Cuts", "L-Carnitine (BioTech)", "XTEND BCAA"],
+    ("cut","f","advanced","hi"):  ["Animal Cuts", "MST Pump Killer", "L-Carnitine (BioTech)", "XTEND BCAA"],
+
+    # ── СИЛА ТА ВИТРИВАЛІСТЬ ────────────────────────────────────────────
+    ("strength","m","beginner","lo"):  ["Optimum Nutrition Creatine Powder", "Optimum Nutrition BCAA 1000"],
+    ("strength","m","beginner","mid"): ["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Men"],
+    ("strength","m","beginner","hi"):  ["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Men", "BSN NO-Xplode"],
+    ("strength","m","middle","lo"):    ["Kevin Levrone Gold Creatine", "XTEND BCAA"],
+    ("strength","m","middle","mid"):   ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend"],
+    ("strength","m","middle","hi"):    ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend", "XTEND BCAA"],
+    ("strength","m","advanced","lo"):  ["Kevin Levrone Anabolic Crea10", "MST BCAA Powder"],
+    ("strength","m","advanced","mid"): ["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "Kevin Levrone Gold Whey"],
+    ("strength","m","advanced","hi"):  ["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "Animal Test", "Kevin Levrone Gold Whey"],
+
+    ("strength","f","beginner","lo"):  ["Optimum Nutrition Creatine Powder", "Optimum Nutrition Opti-Women"],
+    ("strength","f","beginner","mid"): ["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Women"],
+    ("strength","f","beginner","hi"):  ["Optimum Nutrition Creatine Powder", "Rule 1 Whey Blend", "Optimum Nutrition Opti-Women", "BSN NO-Xplode"],
+    ("strength","f","middle","lo"):    ["Kevin Levrone Gold Creatine", "XTEND BCAA"],
+    ("strength","f","middle","mid"):   ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend"],
+    ("strength","f","middle","hi"):    ["BSN NO-Xplode", "Kevin Levrone Gold Creatine", "Rule 1 Whey Blend", "XTEND BCAA"],
+    ("strength","f","advanced","lo"):  ["Kevin Levrone Anabolic Crea10", "MST BCAA Powder"],
+    ("strength","f","advanced","mid"): ["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "Kevin Levrone Gold Whey"],
+    ("strength","f","advanced","hi"):  ["MST Pump Killer", "Kevin Levrone Anabolic Crea10", "XTEND BCAA", "Kevin Levrone Gold Whey"],
+
+    # ── ЗАГАЛЬНЕ ЗДОРОВ'Я ───────────────────────────────────────────────
+    ("health","m","beginner","lo"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Men"],
+    ("health","m","beginner","mid"): ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Men", "Collagen (NOW Foods)"],
+    ("health","m","beginner","hi"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Men", "Collagen (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","m","middle","lo"):    ["Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","m","middle","mid"):   ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","m","middle","hi"):    ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "ZMA (Optimum Nutrition)"],
+    ("health","m","advanced","lo"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","m","advanced","mid"): ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","m","advanced","hi"):  ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "Ашваганда (KSM-66)"],
+
+    ("health","f","beginner","lo"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Women"],
+    ("health","f","beginner","mid"): ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Women", "Collagen (NOW Foods)"],
+    ("health","f","beginner","hi"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Opti-Women", "Collagen (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","f","middle","lo"):    ["Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","f","middle","mid"):   ["Animal Pak", "Omega-3 (NOW Foods)", "Collagen (NOW Foods)"],
+    ("health","f","middle","hi"):    ["Animal Pak", "Omega-3 (NOW Foods)", "Collagen (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","f","advanced","lo"):  ["Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","f","advanced","mid"): ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine"],
+    ("health","f","advanced","hi"):  ["Animal Pak", "Omega-3 (NOW Foods)", "Optimum Nutrition Glutamine", "Ашваганда (KSM-66)"],
 }
 
 PRODUCT_DESC = {
@@ -381,17 +453,30 @@ def main_menu() -> ReplyKeyboardMarkup:
 
 def quiz_goals_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💪 Набір маси",          callback_data="quiz_goal:mass")],
-        [InlineKeyboardButton(text="🔥 Схуднення",           callback_data="quiz_goal:cut")],
-        [InlineKeyboardButton(text="⚡ Сила та витривалість", callback_data="quiz_goal:strength")],
-        [InlineKeyboardButton(text="🌿 Загальне здоров'я",   callback_data="quiz_goal:health")],
+        [InlineKeyboardButton(text="💪 Набір маси",          callback_data="qg:mass")],
+        [InlineKeyboardButton(text="🔥 Схуднення",           callback_data="qg:cut")],
+        [InlineKeyboardButton(text="⚡ Сила та витривалість", callback_data="qg:strength")],
+        [InlineKeyboardButton(text="🌿 Загальне здоров'я",   callback_data="qg:health")],
     ])
 
-def quiz_exp_kb(goal: str) -> InlineKeyboardMarkup:
+def quiz_gender_kb(goal: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🟢 Початківець",    callback_data=f"quiz_exp:{goal}:beginner")],
-        [InlineKeyboardButton(text="🟡 Середній рівень", callback_data=f"quiz_exp:{goal}:middle")],
-        [InlineKeyboardButton(text="🔴 Просунутий",     callback_data=f"quiz_exp:{goal}:advanced")],
+        [InlineKeyboardButton(text="👨 Чоловік", callback_data=f"qs:{goal}:m")],
+        [InlineKeyboardButton(text="👩 Жінка",   callback_data=f"qs:{goal}:f")],
+    ])
+
+def quiz_exp_kb(goal: str, gender: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🟢 Початківець",     callback_data=f"qe:{goal}:{gender}:beginner")],
+        [InlineKeyboardButton(text="🟡 Середній рівень", callback_data=f"qe:{goal}:{gender}:middle")],
+        [InlineKeyboardButton(text="🔴 Просунутий",      callback_data=f"qe:{goal}:{gender}:advanced")],
+    ])
+
+def quiz_budget_kb(goal: str, gender: str, exp: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💰 До 600 грн",       callback_data=f"qb:{goal}:{gender}:{exp}:lo")],
+        [InlineKeyboardButton(text="💳 600 – 1500 грн",   callback_data=f"qb:{goal}:{gender}:{exp}:mid")],
+        [InlineKeyboardButton(text="💎 Понад 1500 грн",   callback_data=f"qb:{goal}:{gender}:{exp}:hi")],
     ])
 
 async def categories_kb() -> InlineKeyboardMarkup:
@@ -816,39 +901,78 @@ GOAL_LABELS = {
     "strength": "⚡ Сила та витривалість",
     "health":   "🌿 Загальне здоров'я",
 }
+GENDER_LABELS = {
+    "m": "👨 Чоловік",
+    "f": "👩 Жінка",
+}
 EXP_LABELS = {
     "beginner": "🟢 Початківець",
     "middle":   "🟡 Середній рівень",
     "advanced": "🔴 Просунутий",
+}
+BUDGET_LABELS = {
+    "lo":  "💰 До 600 грн",
+    "mid": "💳 600–1500 грн",
+    "hi":  "💎 Понад 1500 грн",
 }
 
 @dp.message(F.text == "🎯 Підібрати товар під мене")
 async def quiz_start(msg: Message):
     await msg.answer(
         "🎯 <b>Підбір товару під ваші цілі</b>\n\n"
-        "Дайте відповідь на 2 короткі питання — і я підберу найкращі товари саме для вас!\n\n"
-        "<b>Питання 1 з 2:</b> Яка ваша головна ціль?",
+        "Дайте відповідь на 4 питання — і я підберу найкращі товари саме для вас!\n\n"
+        "<b>Питання 1 з 4:</b> Яка ваша головна ціль?",
         reply_markup=quiz_goals_kb(),
     )
 
-@dp.callback_query(F.data.startswith("quiz_goal:"))
+@dp.callback_query(F.data.startswith("qg:"))
 async def cb_quiz_goal(cb: CallbackQuery):
     goal = cb.data.split(":")[1]
     label = GOAL_LABELS.get(goal, goal)
     await cb.message.edit_text(
-        f"🎯 Ціль: <b>{label}</b>\n\n"
-        "<b>Питання 2 з 2:</b> Який ваш рівень досвіду у спорті?",
-        reply_markup=quiz_exp_kb(goal),
+        f"1️⃣ Ціль: <b>{label}</b>\n\n"
+        "<b>Питання 2 з 4:</b> Ваша стать?",
+        reply_markup=quiz_gender_kb(goal),
     )
     await cb.answer()
 
-@dp.callback_query(F.data.startswith("quiz_exp:"))
-async def cb_quiz_exp(cb: CallbackQuery):
-    _, goal, exp = cb.data.split(":")
-    goal_label = GOAL_LABELS.get(goal, goal)
-    exp_label  = EXP_LABELS.get(exp, exp)
+@dp.callback_query(F.data.startswith("qs:"))
+async def cb_quiz_gender(cb: CallbackQuery):
+    _, goal, gender = cb.data.split(":")
+    goal_label   = GOAL_LABELS.get(goal, goal)
+    gender_label = GENDER_LABELS.get(gender, gender)
+    await cb.message.edit_text(
+        f"1️⃣ Ціль: <b>{goal_label}</b>\n"
+        f"2️⃣ Стать: <b>{gender_label}</b>\n\n"
+        "<b>Питання 3 з 4:</b> Який ваш рівень досвіду у спорті?",
+        reply_markup=quiz_exp_kb(goal, gender),
+    )
+    await cb.answer()
 
-    product_names = QUIZ_RECOMMENDATIONS.get((goal, exp), [])
+@dp.callback_query(F.data.startswith("qe:"))
+async def cb_quiz_exp(cb: CallbackQuery):
+    _, goal, gender, exp = cb.data.split(":")
+    goal_label   = GOAL_LABELS.get(goal, goal)
+    gender_label = GENDER_LABELS.get(gender, gender)
+    exp_label    = EXP_LABELS.get(exp, exp)
+    await cb.message.edit_text(
+        f"1️⃣ Ціль: <b>{goal_label}</b>\n"
+        f"2️⃣ Стать: <b>{gender_label}</b>\n"
+        f"3️⃣ Рівень: <b>{exp_label}</b>\n\n"
+        "<b>Питання 4 з 4:</b> Який ваш місячний бюджет на спортхарч?",
+        reply_markup=quiz_budget_kb(goal, gender, exp),
+    )
+    await cb.answer()
+
+@dp.callback_query(F.data.startswith("qb:"))
+async def cb_quiz_budget(cb: CallbackQuery):
+    _, goal, gender, exp, budget = cb.data.split(":")
+    goal_label   = GOAL_LABELS.get(goal, goal)
+    gender_label = GENDER_LABELS.get(gender, gender)
+    exp_label    = EXP_LABELS.get(exp, exp)
+    budget_label = BUDGET_LABELS.get(budget, budget)
+
+    product_names = QUIZ_RECOMMENDATIONS.get((goal, gender, exp, budget), [])
 
     async with aiosqlite.connect(DB_PATH) as db:
         found = []
@@ -863,9 +987,12 @@ async def cb_quiz_exp(cb: CallbackQuery):
 
     if not found:
         await cb.message.edit_text(
-            f"✅ Ціль: <b>{goal_label}</b> | Рівень: <b>{exp_label}</b>\n\n"
+            f"1️⃣ {goal_label}  2️⃣ {gender_label}  3️⃣ {exp_label}  4️⃣ {budget_label}\n\n"
             "На жаль, рекомендовані товари зараз не знайдені в каталозі. "
-            "Зверніться до нашого менеджера @notsweat02 для персональної консультації!"
+            "Зверніться до нашого менеджера @notsweat02 для персональної консультації!",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🔄 Пройти знову", callback_data="quiz_restart")],
+            ]),
         )
         await cb.answer()
         return
@@ -882,11 +1009,12 @@ async def cb_quiz_exp(cb: CallbackQuery):
         short = pname[:28] + "…" if len(pname) > 28 else pname
         buttons.append([InlineKeyboardButton(text=f"🛒 {short}", callback_data=f"add:{pid}")])
     buttons.append([InlineKeyboardButton(text="🔄 Пройти знову", callback_data="quiz_restart")])
-    buttons.append([InlineKeyboardButton(text="🛍 До каталогу", callback_data="catalog")])
+    buttons.append([InlineKeyboardButton(text="🛍 До каталогу",  callback_data="catalog")])
 
     text = (
         f"✅ <b>Результати підбору:</b>\n"
-        f"Ціль: <b>{goal_label}</b> | Рівень: <b>{exp_label}</b>\n\n"
+        f"1️⃣ {goal_label}  |  2️⃣ {gender_label}\n"
+        f"3️⃣ {exp_label}  |  4️⃣ {budget_label}\n\n"
         f"Ось що ми рекомендуємо:\n\n"
         + "\n\n".join(lines) +
         "\n\n👇 Натисніть на товар щоб одразу додати до кошика:"
@@ -898,7 +1026,7 @@ async def cb_quiz_exp(cb: CallbackQuery):
 async def cb_quiz_restart(cb: CallbackQuery):
     await cb.message.edit_text(
         "🎯 <b>Підбір товару під ваші цілі</b>\n\n"
-        "Яка ваша головна ціль?",
+        "<b>Питання 1 з 4:</b> Яка ваша головна ціль?",
         reply_markup=quiz_goals_kb(),
     )
     await cb.answer()
