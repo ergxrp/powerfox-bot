@@ -964,17 +964,14 @@ async def cb_quiz_exp(cb: CallbackQuery):
     )
     await cb.answer()
 
-@dp.callback_query(F.data.startswith("qb:"))
-async def cb_quiz_budget(cb: CallbackQuery):
-    _, goal, gender, exp, budget = cb.data.split(":")
+async def _show_quiz_results(message, goal: str, gender: str, exp: str, budget: str):
     goal_label   = GOAL_LABELS.get(goal, goal)
     gender_label = GENDER_LABELS.get(gender, gender)
     exp_label    = EXP_LABELS.get(exp, exp)
     budget_label = BUDGET_LABELS.get(budget, budget)
 
     product_names = QUIZ_RECOMMENDATIONS.get((goal, gender, exp, budget), [])
-
-    price_limit = {"lo": 1000, "mid": 2000}.get(budget)
+    price_limit   = {"lo": 1000, "mid": 2000}.get(budget)
 
     async with aiosqlite.connect(DB_PATH) as db:
         found = []
@@ -994,8 +991,10 @@ async def cb_quiz_budget(cb: CallbackQuery):
             if row:
                 found.append(row)
 
+    back_data = f"{goal}:{gender}:{exp}:{budget}"
+
     if not found:
-        await cb.message.edit_text(
+        await message.edit_text(
             f"1️⃣ {goal_label}  2️⃣ {gender_label}  3️⃣ {exp_label}  4️⃣ {budget_label}\n\n"
             "На жаль, рекомендовані товари зараз не знайдені в каталозі. "
             "Зверніться до нашого менеджера @notsweat02 для персональної консультації!",
@@ -1003,7 +1002,6 @@ async def cb_quiz_budget(cb: CallbackQuery):
                 [InlineKeyboardButton(text="🔄 Пройти знову", callback_data="quiz_restart")],
             ]),
         )
-        await cb.answer()
         return
 
     lines = []
@@ -1016,7 +1014,7 @@ async def cb_quiz_budget(cb: CallbackQuery):
     buttons = []
     for pid, pname, weight, price in found:
         short = pname[:28] + "…" if len(pname) > 28 else pname
-        buttons.append([InlineKeyboardButton(text=f"🛒 {short}", callback_data=f"add:{pid}")])
+        buttons.append([InlineKeyboardButton(text=f"👁 {short}", callback_data=f"qview:{pid}:{back_data}")])
     buttons.append([InlineKeyboardButton(text="🔄 Пройти знову", callback_data="quiz_restart")])
     buttons.append([InlineKeyboardButton(text="🛍 До каталогу",  callback_data="catalog")])
 
@@ -1026,9 +1024,14 @@ async def cb_quiz_budget(cb: CallbackQuery):
         f"3️⃣ {exp_label}  |  4️⃣ {budget_label}\n\n"
         f"Ось що ми рекомендуємо:\n\n"
         + "\n\n".join(lines) +
-        "\n\n👇 Натисніть на товар щоб одразу додати до кошика:"
+        "\n\n👇 Натисніть на товар щоб його оглянути:"
     )
-    await cb.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+    await message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+
+@dp.callback_query(F.data.startswith("qb:"))
+async def cb_quiz_budget(cb: CallbackQuery):
+    _, goal, gender, exp, budget = cb.data.split(":")
+    await _show_quiz_results(cb.message, goal, gender, exp, budget)
     await cb.answer()
 
 @dp.callback_query(F.data == "quiz_restart")
@@ -1038,6 +1041,160 @@ async def cb_quiz_restart(cb: CallbackQuery):
         "<b>Питання 1 з 4:</b> Яка ваша головна ціль?",
         reply_markup=quiz_goals_kb(),
     )
+    await cb.answer()
+
+PRODUCT_DETAIL_DESC = {
+    "Optimum Nutrition 100% Whey Gold Standard":
+        "Один з найпопулярніших протеїнів у світі. Містить 24 г білка на порцію, мінімум жирів і вуглеводів. "
+        "Ідеальний для прийому після тренування — швидко засвоюється та запускає ріст м'язів.\n"
+        "📏 <b>Дозування:</b> 1 порція (30 г) у 180–240 мл води або молока одразу після тренування.",
+    "Optimum Nutrition Creatine Powder":
+        "Чистий креатин моногідрат без домішок. Збільшує силові показники, покращує вибухову потужність і прискорює відновлення між підходами.\n"
+        "📏 <b>Дозування:</b> 5 г на день. У перші 5–7 днів (фаза завантаження) — 20 г на день, розділені на 4 прийоми.",
+    "Optimum Nutrition Opti-Men":
+        "Преміальний вітамінно-мінеральний комплекс для чоловіків. Містить 75+ активних інгредієнтів: вітаміни, мінерали, амінокислоти, екстракти рослин.\n"
+        "📏 <b>Дозування:</b> 3 таблетки на день під час їжі.",
+    "Optimum Nutrition Opti-Women":
+        "Вітамінний комплекс розроблений спеціально для жінок. Підтримує гормональний баланс, здоров'я шкіри, нігтів та волосся.\n"
+        "📏 <b>Дозування:</b> 2 таблетки на день під час їжі.",
+    "Kevin Levrone Anabolic Mass":
+        "Потужний гейнер для набору м'язової маси. Містить суміш швидких і повільних протеїнів, складні вуглеводи та креатин. Підходить тим, хто важко набирає вагу.\n"
+        "📏 <b>Дозування:</b> 1–3 порції на день. Одна порція — 150 г порошку на 400–600 мл молока.",
+    "BSN Syntha-6":
+        "Багатокомпонентний протеїн із 6 видів білка. Дає тривале живлення м'язів і відмінний смак. Підходить між прийомами їжі та перед сном.\n"
+        "📏 <b>Дозування:</b> 1–2 порції (47 г) на день у 300 мл молока або води.",
+    "XTEND BCAA":
+        "Класичний BCAA у пропорції 2:1:1 (лейцин:ізолейцин:валін) плюс глютамін і цитрулін малат. Захищає м'язи від руйнування та прискорює відновлення.\n"
+        "📏 <b>Дозування:</b> 1 порція (14 г) під час або після тренування у 300 мл води.",
+    "Mutant Mass":
+        "Екстремальний гейнер для максимального набору маси. До 1060 ккал на порцію, 56 г білка, 192 г вуглеводів. Для тих, хто хоче суттєво збільшити вагу.\n"
+        "📏 <b>Дозування:</b> 1–2 порції на день. Одна порція — 280 г на 600 мл молока.",
+    "Dymatize ISO100":
+        "Ізолят сироваткового протеїну — найчистіша форма білка. 25 г білка, майже нуль жирів і вуглеводів. Ідеальний при схудненні або для тих, хто рахує кожну калорію.\n"
+        "📏 <b>Дозування:</b> 1 порція (32 г) після тренування у 250 мл води.",
+    "C4 Original (Cellucor)":
+        "Легендарний передтренувальний комплекс. Бета-аланін, аргінін, кофеїн і вітаміни групи B дають вибухову енергію та концентрацію на весь тренінг.\n"
+        "📏 <b>Дозування:</b> 1 порція (6 г) у 150 мл води за 20–30 хв до тренування. Не приймати після 17:00.",
+    "Animal Test":
+        "Потужний натуральний тестобустер. Підвищує рівень тестостерону, збільшує силу та libido. Рекомендований для чоловіків від 21 року.\n"
+        "📏 <b>Дозування:</b> 1 пак на день разом з їжею. Курс — 21 день, потім 7 днів перерва.",
+    "L-Carnitine (BioTech)":
+        "Транспортує жирові кислоти в мітохондрії, де вони спалюються як енергія. Найефективніший під час кардіотренувань.\n"
+        "📏 <b>Дозування:</b> 1000–2000 мг за 30–40 хв до кардіотренування.",
+    "Scitec 100% Whey":
+        "Якісний протеїн на основі концентрату сироватки. 22 г білка на порцію, широкий вибір смаків. Відмінне співвідношення ціна/якість.\n"
+        "📏 <b>Дозування:</b> 1–2 порції (30 г) на день — після тренування та між прийомами їжі.",
+    "Nutrex Lipo-6":
+        "Один з найвідоміших жироспалювачів. Рідкі капсули для швидкого засвоєння. Прискорює метаболізм, знижує апетит та підвищує термогенез.\n"
+        "📏 <b>Дозування:</b> 2 капсули вранці та 1 капсула за 6 годин до сну. Не перевищувати 3 капсули на добу.",
+    "Optimum Nutrition Amino Energy":
+        "Амінокислоти + натуральний кофеїн в одному продукті. Дає м'яку енергію, підтримує відновлення та може замінити каву.\n"
+        "📏 <b>Дозування:</b> 1–2 порції (9–18 г) у 300 мл води до або під час тренування.",
+    "MST BCAA Powder":
+        "BCAA у порошку з відмінною розчинністю та смаком. Антикатаболічний ефект та підтримка відновлення м'язів.\n"
+        "📏 <b>Дозування:</b> 1 порція (10 г) під час або після тренування у 300 мл води.",
+    "Animal Cuts":
+        "Комплексний жироспалюючий стек від Universal Nutrition. Містить 8 груп активних інгредієнтів для спалювання жиру, підвищення енергії та виводу зайвої рідини.\n"
+        "📏 <b>Дозування:</b> 1 пак двічі на день разом з їжею. Курс — 3 тижні, 1 тиждень перерва.",
+    "MST Pump Killer":
+        "Передтренувальний без кофеїну на основі аргініну, цитруліну та бета-аланіну. Дає потужний памп, витривалість без перезбудження.\n"
+        "📏 <b>Дозування:</b> 1 порція (20 г) у 300 мл води за 30 хв до тренування.",
+    "Rule 1 Whey Blend":
+        "Суміш швидкого та середнього протеїнів (ізолят + концентрат). 25 г білка, мінімум цукру. Відмінний вибір для щоденного використання.\n"
+        "📏 <b>Дозування:</b> 1 порція (32 г) після тренування у 250–300 мл води або молока.",
+    "BSN NO-Xplode":
+        "Класичний передтренувальний комплекс від BSN. Креатин, бета-аланін, кофеїн і NO-стимулятори дають силу, витривалість та памп.\n"
+        "📏 <b>Дозування:</b> 1 порція (18 г) у 180 мл води за 30 хв до тренування.",
+    "Kevin Levrone Gold Creatine":
+        "Мікронізований креатин моногідрат від Kevin Levrone. Краще розчиняється та засвоюється. Збільшує силу та об'єм м'язів.\n"
+        "📏 <b>Дозування:</b> 5 г на день у воді або соку. Фаза завантаження — 20 г на день перші 5 днів.",
+    "Optimum Nutrition BCAA 1000":
+        "BCAA у зручних капсулах (2:1:1). Не потребує приготування, зручно брати з собою. Захищає м'язи та допомагає відновленню.\n"
+        "📏 <b>Дозування:</b> 2 капсули двічі на день — до та після тренування.",
+    "Kevin Levrone Anabolic Crea10":
+        "Унікальна формула з 10 формами креатину + транспортна система. Максимальне насичення м'язів без затримки води.\n"
+        "📏 <b>Дозування:</b> 1 порція (15 г) за 30 хв до тренування у 250 мл соку.",
+    "Kevin Levrone Gold Whey":
+        "Преміальний протеїн від Kevin Levrone. 23 г білка, відмінний смак, повний амінокислотний профіль для відновлення і росту м'язів.\n"
+        "📏 <b>Дозування:</b> 1–2 порції (30 г) на день у 250 мл молока або води.",
+    "Omega-3 (NOW Foods)":
+        "Риб'ячий жир високої якості. Підтримує здоров'я серцево-судинної системи, суглобів, мозку та знижує запалення в організмі.\n"
+        "📏 <b>Дозування:</b> 1–2 капсули тричі на день під час їжі.",
+    "Collagen (NOW Foods)":
+        "Гідролізований колаген для здоров'я суглобів, зв'язок, шкіри та кісток. Особливо корисний при інтенсивних тренуваннях.\n"
+        "📏 <b>Дозування:</b> 2 капсули двічі на день разом з вітаміном C для кращого засвоєння.",
+    "Animal Pak":
+        "Легендарний вітамінно-мінеральний комплекс для серйозних атлетів. Містить 60+ інгредієнтів: вітаміни, мінерали, амінокислоти, антиоксиданти.\n"
+        "📏 <b>Дозування:</b> 1–2 паки на день разом з їжею. Запивати великою кількістю води.",
+    "Optimum Nutrition Glutamine":
+        "Глютамін у чистому вигляді. Прискорює відновлення, підтримує імунну систему та здоров'я кишківника після інтенсивних навантажень.\n"
+        "📏 <b>Дозування:</b> 5 г після тренування та 5 г перед сном у воді або соку.",
+    "ZMA (Optimum Nutrition)":
+        "Класична формула цинку, магнію та вітаміну B6. Покращує якість сну, підтримує відновлення і природний рівень тестостерону.\n"
+        "📏 <b>Дозування:</b> 3 капсули для чоловіків або 2 для жінок за 30–60 хв до сну на порожній шлунок.",
+    "Ашваганда (KSM-66)":
+        "Преміальний екстракт ашваганди (8% вітанолідів). Знижує рівень кортизолу, покращує стресостійкість, підвищує силу та libido.\n"
+        "📏 <b>Дозування:</b> 1 капсула (300–600 мг) на день разом з їжею. Курс — 2–3 місяці.",
+}
+
+@dp.callback_query(F.data.startswith("qview:"))
+async def cb_quiz_view(cb: CallbackQuery):
+    parts = cb.data.split(":")
+    pid   = int(parts[1])
+    back_data = ":".join(parts[2:])
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        cur = await db.execute(
+            "SELECT name, weight, price, photo_url FROM products WHERE id=?", (pid,)
+        )
+        row = await cur.fetchone()
+    if not row:
+        return await cb.answer("Товар не знайдено")
+
+    name, weight, price, photo_url = row
+    w = f"{weight}" if weight else "—"
+    short_desc = PRODUCT_DESC.get(name, "")
+    detail_desc = PRODUCT_DETAIL_DESC.get(name, "")
+
+    text = (
+        f"📦 <b>{name}</b>\n"
+        f"⚖️ Об'єм/вага: <b>{w}</b>\n"
+        f"💰 Ціна: <b>{price:.0f} грн</b>\n\n"
+        + (f"<i>{short_desc}</i>\n\n" if short_desc else "")
+        + (detail_desc + "\n\n" if detail_desc else "")
+        + "💳 Оплата при отриманні"
+    )
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🛒 Додати до кошика", callback_data=f"add:{pid}")],
+        [InlineKeyboardButton(text="⬅️ До результатів",  callback_data=f"qback:{back_data}")],
+    ])
+
+    if photo_url:
+        try:
+            await cb.message.delete()
+            await bot.send_photo(
+                chat_id=cb.message.chat.id,
+                photo=photo_url,
+                caption=text,
+                reply_markup=kb,
+            )
+        except Exception:
+            await cb.message.edit_text(text, reply_markup=kb)
+    else:
+        await cb.message.edit_text(text, reply_markup=kb)
+    await cb.answer()
+
+@dp.callback_query(F.data.startswith("qback:"))
+async def cb_quiz_back(cb: CallbackQuery):
+    parts = cb.data.split(":")
+    goal, gender, exp, budget = parts[1], parts[2], parts[3], parts[4]
+    if cb.message.photo:
+        await cb.message.delete()
+        msg = await bot.send_message(cb.message.chat.id, "⏳")
+        await _show_quiz_results(msg, goal, gender, exp, budget)
+    else:
+        await _show_quiz_results(cb.message, goal, gender, exp, budget)
     await cb.answer()
 
 # ══════════════════════════════════════════
